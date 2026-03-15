@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billing Management System</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>💼 Billing Management System</h1>
+            <div class="user-info" id="userInfo"></div>
+        </header>
+
+        <!-- Client Selector -->
+        <div class="client-bar">
+            <label>Client:</label>
+            <select id="activeClient" onchange="onClientChange()">
+                <option value="">-- Select Client --</option>
+            </select>
+            <button onclick="showAddClient()">+ New Client</button>
+            <button onclick="editClient()" class="btn-secondary">Edit</button>
+            <button onclick="deleteClient()" class="btn-danger">Delete</button>
+        </div>
+
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
+            <button class="tab-btn" data-tab="roles">Roles</button>
+            <button class="tab-btn" data-tab="employees">Employees</button>
+            <button class="tab-btn" data-tab="holidays">Holidays</button>
+            <button class="tab-btn" data-tab="leaves">Leaves</button>
+            <button class="tab-btn" data-tab="reports">Reports</button>
+            <button class="tab-btn" data-tab="settings">Settings</button>
+        </nav>
+
+        <div id="noClient" class="tab-content active" style="text-align:center; padding:60px;">
+            <h2>Welcome! 👋</h2>
+            <p style="margin:20px 0;">Create or select a client to get started.</p>
+            <button onclick="showAddClient()">+ Add Your First Client</button>
+        </div>
+
+        <div id="dashboard" class="tab-content"><h2>Monthly Billing</h2>
+            <div class="month-selector"><label>Month:</label><input type="month" id="dashboardMonth"><button onclick="loadMonthlyBilling()">Load</button></div>
+            <div id="monthlyBillingTable"></div></div>
+
+        <div id="roles" class="tab-content"><h2>Roles & Hourly Rates</h2>
+            <div class="form-section"><h3>Add Role</h3><form id="roleForm">
+                <input type="text" id="roleName" placeholder="Role Name" required>
+                <input type="number" id="roleRate" placeholder="Hourly Rate (USD)" step="0.01" min="0.01" required>
+                <button type="submit">Add Role</button></form></div>
+            <div id="rolesTable"></div></div>
+
+        <div id="employees" class="tab-content"><h2>Employees</h2>
+            <div class="form-section"><h3>Add Employee</h3><form id="employeeForm">
+                <input type="text" id="empName" placeholder="Employee Name" required>
+                <select id="empRole" required><option value="">Select Role</option></select>
+                <input type="date" id="empStartDate" required>
+                <label><input type="checkbox" id="empActive" checked> Active</label>
+                <button type="submit">Add Employee</button></form></div>
+            <div id="employeesTable"></div></div>
+
+        <div id="holidays" class="tab-content"><h2>Holidays</h2>
+            <div class="form-section"><h3>Add Holidays</h3><form id="holidayForm">
+                <input type="number" id="holidayYear" placeholder="Year" required>
+                <button type="button" onclick="addHolidayRow()">+ Add Date</button></form>
+                <div id="holidayInputs"></div>
+                <button id="submitHolidays" style="display:none;" onclick="submitHolidays()">Submit All</button></div>
+            <div class="filter-section"><label>Year:</label><input type="number" id="filterYear" placeholder="Year"><button onclick="loadHolidays()">Filter</button></div>
+            <div id="holidaysTable"></div></div>
+
+        <div id="leaves" class="tab-content"><h2>Leaves</h2>
+            <div class="form-section"><h3>Add Leave</h3><form id="leaveForm">
+                <select id="leaveEmployee" required><option value="">Select Employee</option></select>
+                <input type="date" id="leaveDate" required>
+                <label><input type="checkbox" id="leaveHalfDay"> Half Day</label>
+                <button type="submit">Add Leave</button></form></div>
+            <div class="filter-section"><label>Employee:</label><select id="filterEmployee" onchange="loadLeaves()"><option value="">All</option></select></div>
+            <div id="leavesTable"></div></div>
+
+        <div id="reports" class="tab-content"><h2>Reports</h2>
+            <div class="form-section"><h3>Custom Date Range</h3><form id="reportForm">
+                <input type="date" id="reportStartDate" required>
+                <input type="date" id="reportEndDate" required>
+                <button type="button" onclick="generateReport()">Calculate</button>
+                <button type="button" onclick="exportReport('xlsx')" class="btn-secondary">Export XLSX</button>
+                <button type="button" onclick="exportReport('pdf')" class="btn-secondary">Export PDF</button></form></div>
+            <div id="reportTable"></div></div>
+
+        <div id="settings" class="tab-content"><h2>Settings</h2>
+            <div class="form-section"><h3>Change Password</h3><form id="passwordForm" autocomplete="off">
+                <div class="pw-wrap"><input type="password" id="currentPassword" placeholder="Current Password" required autocomplete="off"><button type="button" class="pw-eye" onclick="togglePw('currentPassword',this)">👁️</button></div>
+                <div class="pw-wrap" style="margin-top:10px;"><input type="password" id="newPassword" placeholder="New Password" required autocomplete="new-password" oninput="checkPwSettings(this.value)"><button type="button" class="pw-eye" onclick="togglePw('newPassword',this)">👁️</button></div>
+                <div id="pwSettingsStrength" style="font-size:0.8em;color:#666;"></div>
+                <div style="font-size:0.75em;color:#888;">Min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char. Must not contain your name.</div>
+                <div class="pw-wrap" style="margin-top:10px;"><input type="password" id="confirmPassword" placeholder="Confirm Password" required autocomplete="new-password"><button type="button" class="pw-eye" onclick="togglePw('confirmPassword',this)">👁️</button></div>
+                <button type="submit">Change Password</button></form></div>
+            <div class="form-section"><h3>Security Questions</h3>
+                <p style="color:#666;margin-bottom:10px;">Set these to enable password recovery.</p>
+                <form id="securityQuestionsForm">
+                    <select id="securityQuestion1" required><option value="">Select Question 1</option>
+                        <option value="What is your mother's maiden name?">What is your mother's maiden name?</option>
+                        <option value="What was the name of your first pet?">What was the name of your first pet?</option>
+                        <option value="What city were you born in?">What city were you born in?</option>
+                        <option value="What is your favorite book?">What is your favorite book?</option>
+                        <option value="What was your childhood nickname?">What was your childhood nickname?</option></select>
+                    <input type="text" id="securityAnswer1" placeholder="Answer 1" required>
+                    <select id="securityQuestion2" required><option value="">Select Question 2</option>
+                        <option value="What is the name of your favorite teacher?">What is the name of your favorite teacher?</option>
+                        <option value="What was your first car?">What was your first car?</option>
+                        <option value="What is your favorite movie?">What is your favorite movie?</option>
+                        <option value="In what city did you meet your spouse?">In what city did you meet your spouse?</option>
+                        <option value="What is your favorite food?">What is your favorite food?</option></select>
+                    <input type="text" id="securityAnswer2" placeholder="Answer 2" required>
+                    <button type="submit">Save</button></form>
+                <div id="securityStatus" style="margin-top:10px;padding:10px;background:#d4edda;border-radius:5px;display:none;"><span style="color:#155724;">✅ Security questions are set</span></div></div>
+        </div>
+    </div>
+
+    <div id="notification" class="notification"></div>
+    <div id="modal" class="modal hidden"><div class="modal-content"><h3>Add New Client</h3>
+        <input type="text" id="modalClientName" placeholder="Client Name"><input type="text" id="modalClientDesc" placeholder="Description (optional)" style="margin-top:10px;">
+        <div style="margin-top:15px;display:flex;gap:10px;"><button onclick="submitNewClient()">Create</button><button onclick="closeModal()" class="btn-secondary">Cancel</button></div></div></div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
