@@ -6,49 +6,7 @@ from datetime import datetime
 from calendar import monthrange
 import io, os, random, string, re
 
-# In-memory OTP store: {email: {'otp': '123456', 'expires': datetime, 'data': {...}}}
-pending_registrations = {}
 
-# Email config - set these as environment variables for production
-SMTP_EMAIL = os.environ.get('SMTP_EMAIL', '')  # e.g. your Gmail
-SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD', '')  # Gmail App Password
-SMTP_SERVER = os.environ.get('SMTP_SERVER', 'smtp.gmail.com')
-SMTP_PORT = int(os.environ.get('SMTP_PORT', '587'))
-
-def send_otp_email(to_email, otp):
-    """Send OTP via email. Falls back to console if SMTP not configured."""
-    if not SMTP_EMAIL or not SMTP_PASSWORD:
-        print(f"[OTP] Email: {to_email} | OTP: {otp}", flush=True)
-        return False
-    
-    try:
-        import smtplib
-        from email.mime.text import MIMEText
-        from email.mime.multipart import MIMEMultipart
-        msg = MIMEMultipart()
-        msg['From'] = SMTP_EMAIL
-        msg['To'] = to_email
-        msg['Subject'] = 'Billing App - Email Verification Code'
-        body = f"""<html><body style="font-family:Arial,sans-serif;">
-        <div style="max-width:400px;margin:0 auto;padding:30px;border:1px solid #ddd;border-radius:10px;">
-            <h2 style="color:#366092;text-align:center;">\U0001f4bc Billing System</h2>
-            <p>Your verification code is:</p>
-            <div style="text-align:center;padding:20px;background:#f0f4f8;border-radius:8px;margin:15px 0;">
-                <span style="font-size:32px;font-weight:bold;letter-spacing:8px;color:#366092;">{otp}</span>
-            </div>
-            <p style="color:#666;font-size:0.9em;">This code expires in 10 minutes. Do not share it with anyone.</p>
-        </div></body></html>"""
-        msg.attach(MIMEText(body, 'html'))
-        
-        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
-            server.starttls()
-            server.login(SMTP_EMAIL, SMTP_PASSWORD)
-            server.send_message(msg)
-        return True
-    except Exception as e:
-        print(f"[EMAIL ERROR] {e}", flush=True)
-        print(f"[OTP FALLBACK] Email: {to_email} | OTP: {otp}", flush=True)
-        return False
 
 
 app = Flask(__name__)
@@ -107,58 +65,14 @@ def register():
         if User.query.filter_by(email=data['email']).first():
             return jsonify({'error': 'Email already registered'}), 400
 
-        otp = ''.join(random.choices(string.digits, k=6))
-        pending_registrations[data['email'].strip().lower()] = {
-            'otp': otp,
-            'expires': datetime.utcnow().replace(second=0) + __import__('datetime').timedelta(minutes=10),
-            'data': {
-                'username': data['username'].strip(),
-                'full_name': data['full_name'].strip(),
-                'email': data['email'].strip(),
-                'password': data['password']
-            }
-        }
-        email_sent = send_otp_email(data['email'].strip(), otp)
-        msg = f'Verification code sent to {data["email"]}.' if email_sent else f'Verification code sent to {data["email"]}. Check server console for OTP (email not configured).'
-        return jsonify({'success': False, 'otp_required': True, 'email': data['email'].strip(), 'message': msg})
+        user = User(username=data['username'].strip(), full_name=data['full_name'].strip(), email=data['email'].strip(), email_verified=True)
+        user.set_password(data['password'])
+        db.session.add(user)
+        db.session.commit()
+        login_user(user)
+        return jsonify({'success': True})
     return render_template('login.html')
 
-@app.route('/api/verify-otp', methods=['POST'])
-def verify_otp():
-    data = request.json
-    email = data.get('email', '').strip().lower()
-    otp = data.get('otp', '').strip()
-
-    pending = pending_registrations.get(email)
-    if not pending:
-        return jsonify({'error': 'No pending registration for this email. Please register again.'}), 400
-    if pending['otp'] != otp:
-        return jsonify({'error': 'Invalid verification code'}), 400
-    if datetime.utcnow() > pending['expires']:
-        del pending_registrations[email]
-        return jsonify({'error': 'Code expired. Please register again.'}), 400
-
-    reg = pending['data']
-    user = User(username=reg['username'], full_name=reg['full_name'], email=reg['email'], email_verified=True)
-    user.set_password(reg['password'])
-    db.session.add(user)
-    db.session.commit()
-    del pending_registrations[email]
-    login_user(user)
-    return jsonify({'success': True})
-
-@app.route('/api/resend-otp', methods=['POST'])
-def resend_otp():
-    email = request.json.get('email', '').strip().lower()
-    pending = pending_registrations.get(email)
-    if not pending:
-        return jsonify({'error': 'No pending registration. Please register again.'}), 400
-    otp = ''.join(random.choices(string.digits, k=6))
-    pending['otp'] = otp
-    pending['expires'] = datetime.utcnow().replace(second=0) + __import__('datetime').timedelta(minutes=10)
-    email_sent = send_otp_email(email, otp)
-    msg = 'New code sent to your email.' if email_sent else 'New code sent. Check server console.'
-    return jsonify({'message': msg})
 
 def validate_password(pw, full_name=''):
     if len(pw) < 8:

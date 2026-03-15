@@ -79,20 +79,7 @@
             <div class="links"><a href="#" onclick="showPanel('login')">Back to Login</a></div>
         </form>
 
-        <!-- OTP VERIFICATION FORM -->
-        <form id="otpForm" class="hidden">
-            <div style="text-align:center;margin-bottom:15px;">
-                <div style="font-size:2em;">📧</div>
-                <p id="otpMessage" style="color:#666;margin-top:10px;">Enter the 6-digit code sent to your email</p>
-            </div>
-            <div class="form-group">
-                <label>Verification Code</label>
-                <input type="text" id="otpCode" maxlength="6" placeholder="000000" required autocomplete="off" style="text-align:center;font-size:1.5em;letter-spacing:8px;">
-            </div>
-            <button type="submit">Verify & Create Account</button>
-            <button type="button" onclick="resendOTP()" class="btn-secondary">Resend Code</button>
-            <div class="links"><a href="#" onclick="showPanel('register')">Back</a></div>
-        </form>
+        <!-- OTP form removed - direct registration -->
 
         <!-- FORGOT PASSWORD FORM -->
         <div id="forgotForm" class="hidden">
@@ -127,7 +114,6 @@
 
     <script>
         let resetUsername = '';
-        let otpEmail = '';
 
         function togglePw(id, btn) {
             const i = document.getElementById(id);
@@ -137,12 +123,12 @@
         }
 
         function showPanel(panel) {
-            ['loginForm','registerForm','forgotForm','securityForm','otpForm'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            ['loginForm','registerForm','forgotForm','securityForm'].forEach(id => document.getElementById(id).classList.add('hidden'));
             document.getElementById('error').style.display = 'none';
             document.getElementById('success').style.display = 'none';
-            const titles = {login:'Login to your account',register:'Create a new account',forgot:'Reset your password',security:'Answer security questions',otp:'Verify your email'};
+            const titles = {login:'Login to your account',register:'Create a new account',forgot:'Reset your password',security:'Answer security questions'};
             document.getElementById('pageSubtitle').textContent = titles[panel] || '';
-            const formMap = {login:'loginForm',register:'registerForm',forgot:'forgotForm',security:'securityForm',otp:'otpForm'};
+            const formMap = {login:'loginForm',register:'registerForm',forgot:'forgotForm',security:'securityForm'};
             if (formMap[panel]) document.getElementById(formMap[panel]).classList.remove('hidden');
         }
 
@@ -190,24 +176,9 @@
                 username: document.getElementById('regUsername').value,
                 password: document.getElementById('regPassword').value
             });
-            if (res.data.otp_required) {
-                otpEmail = res.data.email;
-                document.getElementById('otpMessage').textContent = res.data.message;
-                showPanel('otp');
-            } else if (res.data.success) { window.location.href = '/'; }
+            if (res.data.success) { window.location.href = '/'; }
             else { showError(res.data.error || 'Registration failed'); }
         });
-
-        document.getElementById('otpForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const res = await postJSON('/api/verify-otp', { email: otpEmail, otp: document.getElementById('otpCode').value });
-            if (res.data.success) { window.location.href = '/'; } else { showError(res.data.error || 'Verification failed'); }
-        });
-
-        async function resendOTP() {
-            const res = await postJSON('/api/resend-otp', { email: otpEmail });
-            if (res.ok) { showSuccess(res.data.message); } else { showError(res.data.error); }
-        }
 
         document.getElementById('forgotStep1').addEventListener('submit', async (e) => {
             e.preventDefault();
