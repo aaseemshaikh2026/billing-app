@@ -4,9 +4,7 @@ from models import db, User, Client, Role, Employee, Holiday, Leave
 from utils import get_date_range_billing, calculate_billing
 from datetime import datetime
 from calendar import monthrange
-import io, os, random, string, re, smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import io, os, random, string, re
 
 # In-memory OTP store: {email: {'otp': '123456', 'expires': datetime, 'data': {...}}}
 pending_registrations = {}
@@ -24,6 +22,9 @@ def send_otp_email(to_email, otp):
         return False
     
     try:
+        import smtplib
+        from email.mime.text import MIMEText
+        from email.mime.multipart import MIMEMultipart
         msg = MIMEMultipart()
         msg['From'] = SMTP_EMAIL
         msg['To'] = to_email
