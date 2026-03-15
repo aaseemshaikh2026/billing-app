@@ -48,13 +48,7 @@ def send_otp_email(to_email, otp):
         print(f"[EMAIL ERROR] {e}", flush=True)
         print(f"[OTP FALLBACK] Email: {to_email} | OTP: {otp}", flush=True)
         return False
-from openpyxl import Workbook
-from openpyxl.styles import Font, Alignment, PatternFill
-from reportlab.lib.pagesizes import A4
-from reportlab.lib import colors
-from reportlab.lib.units import inch
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
@@ -526,6 +520,8 @@ def export_xlsx(cid):
     start_date = datetime.strptime(data['start_date'], '%Y-%m-%d').date()
     end_date = datetime.strptime(data['end_date'], '%Y-%m-%d').date()
 
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, Alignment, PatternFill
     wb = Workbook()
     ws = wb.active
     ws.title = "Billing Report"
@@ -566,6 +562,11 @@ def export_pdf(cid):
     start_date = datetime.strptime(data['start_date'], '%Y-%m-%d').date()
     end_date = datetime.strptime(data['end_date'], '%Y-%m-%d').date()
 
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib import colors
+    from reportlab.lib.units import inch
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
     buf = io.BytesIO()
     doc = SimpleDocTemplate(buf, pagesize=A4)
     styles = getSampleStyleSheet()
