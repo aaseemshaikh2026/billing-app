@@ -53,8 +53,8 @@ input[type="checkbox"] { cursor: pointer; width: 18px; height: 18px; }
 .hidden { display: none !important; }
 .pw-wrap { position: relative; flex: 1; min-width: 140px; }
 .pw-wrap input { width: 100%; padding-right: 38px; }
-.pw-eye { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none !important; border: none; cursor: pointer; padding: 0; width: auto; min-width: auto; color: #888; font-size: 1.1em; }
-.pw-eye:hover { color: #366092; background: none !important; }
+.pw-eye { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; padding: 0; width: auto; min-width: auto; color: #888; font-size: 1.1em; user-select: none; }
+.pw-eye:hover { color: #366092; }
 
 .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 2000; }
 .modal-content { background: white; padding: 30px; border-radius: 10px; width: 400px; max-width: 90%; }

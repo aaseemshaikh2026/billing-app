@@ -89,11 +89,11 @@
 
         <div id="settings" class="tab-content"><h2>Settings</h2>
             <div class="form-section"><h3>Change Password</h3><form id="passwordForm" autocomplete="off">
-                <div class="pw-wrap"><input type="password" id="currentPassword" placeholder="Current Password" required autocomplete="off"><button type="button" class="pw-eye" onclick="togglePw('currentPassword',this)">👁️</button></div>
-                <div class="pw-wrap" style="margin-top:10px;"><input type="password" id="newPassword" placeholder="New Password" required autocomplete="new-password" oninput="checkPwSettings(this.value)"><button type="button" class="pw-eye" onclick="togglePw('newPassword',this)">👁️</button></div>
+                <div class="pw-wrap"><input type="password" id="currentPassword" placeholder="Current Password" required autocomplete="off"><span class="pw-eye" onclick="togglePw('currentPassword',this)">👁️</span></div>
+                <div class="pw-wrap" style="margin-top:10px;"><input type="password" id="newPassword" placeholder="New Password" required autocomplete="new-password" oninput="checkPwSettings(this.value)"><span class="pw-eye" onclick="togglePw('newPassword',this)">👁️</span></div>
                 <div id="pwSettingsStrength" style="font-size:0.8em;color:#666;"></div>
                 <div style="font-size:0.75em;color:#888;">Min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char. Must not contain your name.</div>
-                <div class="pw-wrap" style="margin-top:10px;"><input type="password" id="confirmPassword" placeholder="Confirm Password" required autocomplete="new-password"><button type="button" class="pw-eye" onclick="togglePw('confirmPassword',this)">👁️</button></div>
+                <div class="pw-wrap" style="margin-top:10px;"><input type="password" id="confirmPassword" placeholder="Confirm Password" required autocomplete="new-password"><span class="pw-eye" onclick="togglePw('confirmPassword',this)">👁️</span></div>
                 <button type="submit">Change Password</button></form></div>
             <div class="form-section"><h3>Security Questions</h3>
                 <p style="color:#666;margin-bottom:10px;">Set these to enable password recovery.</p>

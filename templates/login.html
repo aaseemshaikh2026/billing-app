@@ -46,7 +46,7 @@
             </div>
             <div class="form-group">
                 <label>Password</label>
-                <div class="pw-wrap"><input type="password" id="loginPassword" required autocomplete="off"><button type="button" class="pw-eye" onclick="togglePw('loginPassword',this)">👁️</button></div>
+                <div class="pw-wrap"><input type="password" id="loginPassword" required autocomplete="off"><span class="pw-eye" onclick="togglePw('loginPassword',this)">👁️</span></div>
             </div>
             <button type="submit">Login</button>
             <div class="links">
@@ -71,7 +71,7 @@
             </div>
             <div class="form-group">
                 <label>Password</label>
-                <div class="pw-wrap"><input type="password" id="regPassword" required autocomplete="new-password" oninput="checkPasswordStrength(this.value)"><button type="button" class="pw-eye" onclick="togglePw('regPassword',this)">👁️</button></div>
+                <div class="pw-wrap"><input type="password" id="regPassword" required autocomplete="new-password" oninput="checkPasswordStrength(this.value)"><span class="pw-eye" onclick="togglePw('regPassword',this)">👁️</span></div>
                 <div id="pwStrength" style="font-size:0.8em;margin-top:5px;color:#666;"></div>
                 <div style="font-size:0.75em;color:#888;margin-top:3px;">Min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char. Must not contain your name.</div>
             </div>
@@ -118,7 +118,7 @@
             </div>
             <div class="form-group">
                 <label>New Password</label>
-                <div class="pw-wrap"><input type="password" id="forgotNewPassword" required autocomplete="new-password"><button type="button" class="pw-eye" onclick="togglePw('forgotNewPassword',this)">👁️</button></div>
+                <div class="pw-wrap"><input type="password" id="forgotNewPassword" required autocomplete="new-password"><span class="pw-eye" onclick="togglePw('forgotNewPassword',this)">👁️</span></div>
             </div>
             <button type="submit">Reset Password</button>
             <div class="links"><a href="#" onclick="showPanel('login')">Back to Login</a></div>
